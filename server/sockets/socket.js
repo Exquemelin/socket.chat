@@ -30,13 +30,16 @@ io.on('connection', (client) => {
         // Obtenemos todas las personas conectadas, incluyendo ya la reción conectada, y lo emitimos a todas las personas conectadas
         client.broadcast.to(data.sala).emit('listaPersona', usuarios.getPersonasPorSala(data.sala));
 
+        // Emitimos un evento para todos los clientes conectados
+        client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador', `${ data.nombre } se unió el chat`));
+
         // Devolvemos en el callback el array de personas, que son las que están conectadas
         callback(usuarios.getPersonasPorSala(data.sala));
 
     });
 
     // Escuchamos un mensaje que envie un cliente para emitirlo a todas las personas que estén en su misma sala
-    client.on('crearMensaje', (data) => {
+    client.on('crearMensaje', (data, callback) => {
 
         let persona = usuarios.getPersona(client.id);
 
@@ -44,6 +47,8 @@ io.on('connection', (client) => {
 
         // Mandamos el mensaje a todos los clientes, pero le decimos a qué sala pertenecen los que tienen que escuchar
         client.broadcast.to(persona.sala).emit('crearMensaje', mensaje);
+
+        callback(mensaje);
 
     })
 
